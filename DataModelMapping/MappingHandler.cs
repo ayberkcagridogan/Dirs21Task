@@ -1,6 +1,4 @@
 using System.Reflection;
-using System.Text.RegularExpressions;
-using DataModelMapping.Extensions;
 using DataModelMapping.Mapping;
 using FluentResults;
 
@@ -35,24 +33,12 @@ public class MappingHandler
             return Result.Fail("Target Type not found");
 
 
-        var keyResult = createKey(sourceType, targetType);
-        if(keyResult.IsFailed)
-            return Result.Fail(keyResult.Errors);
+        var key = new MappingKey(sourceType, targetType);
 
-       if (!_mappingStrategies.TryGetValue(keyResult.Value, out var strategy))
-            return Result.Fail($"Strategy not found: {sourceType} → {sourceType}");
+       if (!_mappingStrategies.TryGetValue(key, out var strategy))
+            return Result.Fail($"Strategy not found: {sourceType} → {targetType}");
 
         return await strategy.ExecuteAsync(data,cancellationToken);
 
-    }
-
-    private Result<MappingKey> createKey(string sourceType, string targetType)
-    {
-        return EnumExtensions.FromDescription(sourceType)
-            .Bind(source =>
-            EnumExtensions.FromDescription(targetType)
-                .Map(target => new MappingKey(source, target))
-            );
-    }
-    
+    }    
 }
