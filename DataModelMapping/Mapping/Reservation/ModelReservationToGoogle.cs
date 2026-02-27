@@ -1,4 +1,4 @@
-using DataModelMapping.Models.Reservation;
+using FluentResults;
 
 namespace DataModelMapping.Mapping.Reservation;
 
@@ -6,8 +6,8 @@ public class ModelReservationToGoogle : IMappingStrategy
 {
     public MappingKey Key => new(MappingType.ModelReservation, MappingType.GoogleReservation);
 
-    public object Execute(object data)
+    public async Task<Result<object>> ExecuteAsync(object data, CancellationToken cancellationToken = default)
     {
-        return "Model to Google Reservation";
+        return Result.Ok<object>("Model to Google Reservation");
     }
 }
