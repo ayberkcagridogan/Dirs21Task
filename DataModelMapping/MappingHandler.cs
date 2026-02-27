@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using DataModelMapping.Extensions;
 using DataModelMapping.Mapping;
+using FluentResults;
 
 namespace DataModelMapping;
 
@@ -24,22 +25,34 @@ public class MappingHandler
             s => s);
     }
 
-    public object Map(object data, string sourceType, string targetType)
+    public async Task<Result<object>> Map(object data, string sourceType, string targetType, CancellationToken cancellationToken = default)
     {
         if(data is null)
-            throw new ArgumentNullException("Data Null");
+            return Result.Fail("Data not found");
         if(string.IsNullOrEmpty(sourceType))
-            throw new ArgumentNullException("Data Null");
+           return Result.Fail("Source Type not found");
         if(string.IsNullOrEmpty(targetType))
-            throw new ArgumentNullException("Data Null");
+            return Result.Fail("Target Type not found");
 
-        var key = new MappingKey(EnumExtensions.FromDescription(sourceType), EnumExtensions.FromDescription(targetType));
 
-       if (!_mappingStrategies.TryGetValue(key, out var strategy))
-            throw new InvalidOperationException(
-                $"Strategy not found: {sourceType} → {targetType}");
+        var keyResult = createKey(sourceType, targetType);
+        if(keyResult.IsFailed)
+            return Result.Fail(keyResult.Errors);
 
-        return strategy.Execute(data);
+       if (!_mappingStrategies.TryGetValue(keyResult.Value, out var strategy))
+            return Result.Fail($"Strategy not found: {sourceType} → {sourceType}");
+
+        return await strategy.ExecuteAsync(data,cancellationToken);
 
     }
+
+    private Result<MappingKey> createKey(string sourceType, string targetType)
+    {
+        return EnumExtensions.FromDescription(sourceType)
+            .Bind(source =>
+            EnumExtensions.FromDescription(targetType)
+                .Map(target => new MappingKey(source, target))
+            );
+    }
+    
 }

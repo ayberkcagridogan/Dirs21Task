@@ -1,11 +1,13 @@
+using FluentResults;
+
 namespace DataModelMapping.Mapping.Reservation;
 
 public class ModelReservationToBooking() : IMappingStrategy
 {
     public MappingKey Key => new(MappingType.ModelReservation, MappingType.BookingReservation);
 
-    public object Execute(object data)
+    public async Task<Result<object>> ExecuteAsync(object data, CancellationToken cancellationToken = default)
     {
-        return "Model to Booking Reservation";
+       return Result.Ok<object>("Model to Booking Reservation");
     }
 }
