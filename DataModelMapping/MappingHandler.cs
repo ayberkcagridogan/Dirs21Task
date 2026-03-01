@@ -1,30 +1,22 @@
 using System.Reflection;
 using DataModelMapping.Mapping;
 using FluentResults;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DataModelMapping;
 
 public class MappingHandler
 {
-     private readonly Dictionary<MappingKey, IMappingStrategy> _mappingStrategies;
-    public MappingHandler()
+    private readonly IServiceProvider _serviceProvider;
+    public MappingHandler(IServiceProvider serviceProvider)
     {
-        var mappingTypes = Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t =>
-                !t.IsAbstract &&
-                typeof(IMappingStrategy).IsAssignableFrom(t));
-
-        var mappingStrategies = mappingTypes
-            .Select(t => (IMappingStrategy)Activator.CreateInstance(t)!);
-
-        _mappingStrategies = mappingStrategies.ToDictionary(
-            s => s.Key,
-            s => s);
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<Result<object>> Map(object data, string sourceType, string targetType, CancellationToken cancellationToken = default)
     {
+        Dictionary<MappingKey, IMappingStrategy> _mappingStrategies = getIMappingStrategies();
+
         if(data is null)
             return Result.Fail("Data not found");
         if(string.IsNullOrEmpty(sourceType))
@@ -32,13 +24,27 @@ public class MappingHandler
         if(string.IsNullOrEmpty(targetType))
             return Result.Fail("Target Type not found");
 
-
         var key = new MappingKey(sourceType, targetType);
 
-       if (!_mappingStrategies.TryGetValue(key, out var strategy))
+        if (!_mappingStrategies.TryGetValue(key, out var strategy))
             return Result.Fail($"Strategy not found: {sourceType} → {targetType}");
 
-        return await strategy.ExecuteAsync(data,cancellationToken);
+        return await strategy.ExecuteAsync(data, cancellationToken);
+    }
 
-    }    
+    private Dictionary<MappingKey, IMappingStrategy> getIMappingStrategies()
+    {
+        var mappingTypes = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t =>!t.IsAbstract && typeof(IMappingStrategy).IsAssignableFrom(t));
+
+        var mappingStrategies = mappingTypes
+            .Select(t => (IMappingStrategy)ActivatorUtilities.CreateInstance(_serviceProvider, t)!);
+
+        return mappingStrategies.ToDictionary
+                (
+                    s => s.Key,
+                    s => s
+                );
+    }
 }
