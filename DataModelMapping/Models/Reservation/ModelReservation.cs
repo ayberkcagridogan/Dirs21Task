@@ -3,12 +3,12 @@ using DataModelMapping.Models.Common;
 namespace DataModelMapping.Models.Reservation;
 public class ModelReservation
 {
-    public int Id { get; set; }
-    public string HotelName { get; set; } = string.Empty;
-    public DateTime ReservationTime { get; set; }
-    public DateTime CheckIn { get; set; }
-    public DateTime CheckOut { get; set; }
-    public int NumberOfPerson { get; set; }
-    public RoomType RoomType { get; set; }
-    public int Price { get; set; }
+    public required int Id { get; set; }
+    public required string HotelName { get; set; }
+    public required DateTime ReservationTime { get; set; }
+    public required DateTime CheckIn { get; set; }
+    public required DateTime CheckOut { get; set; }
+    public required int NumberOfPerson { get; set; }
+    public required RoomType RoomType { get; set; }
+    public required int Price { get; set; }
 }

@@ -1,10 +1,10 @@
 using DataModelMapping.Models.Common;
 
 namespace DataModelMapping.Models.Reservation;
-public class GoogleReservation
+public class BookingReservation
 {
     public int Id { get; set; }
-    public required string HotelName { get; set; }
+    public required string HotelName { get; set; } = string.Empty;
     public required DateTime ReservationTime { get; set; }
     public required DateTime CheckIn { get; set; }
     public required int StayDays { get; set; }

@@ -1,13 +1,53 @@
+using DataModelMapping.Data;
+using DataModelMapping.Extensions;
+using DataModelMapping.Models.Common;
+using DataModelMapping.Models.Reservation;
+using DataModelMapping.Validators;
 using FluentResults;
 
 namespace DataModelMapping.Mapping.Reservation;
 
 public class BookingReservationToModel : IMappingStrategy
 {
+    private readonly IJsonValidationPipeline<BookingReservation> _validation;
+    private readonly IJsonProcesses<ModelReservation> _jsonProcesses;
+    public BookingReservationToModel(IJsonValidationPipeline<BookingReservation> validation, IJsonProcesses<ModelReservation> jsonProcesses)
+    {
+        _validation = validation;
+        _jsonProcesses = jsonProcesses;
+    }
     public MappingKey Key => new("Booking.Reservation", "Model.Reservation");
 
     public async Task<Result<object>> ExecuteAsync(object data, CancellationToken cancellationToken = default)
     {
-        return Result.Ok<object>("Booking to Model Reservation");
+        var validationResult = await _validation.ValidationAsync(data.ToString()!, cancellationToken);
+
+        if(validationResult.IsFailed)
+            return Result.Fail(validationResult.Errors.Select(e => e.Message));
+
+        var bookingReservation = validationResult.ValueOrDefault;
+
+        var roomTypeResult = bookingReservation.RoomType.ToEnum<RoomType>();
+        if(roomTypeResult.IsFailed)
+            return Result.Fail(roomTypeResult.Errors.Select(x => x.Message));
+
+        var modelReservation = new ModelReservation
+        {
+            Id = 0, 
+            HotelName = bookingReservation.HotelName,
+            ReservationTime = bookingReservation.ReservationTime,
+            CheckIn = bookingReservation.CheckIn,
+            CheckOut = bookingReservation.CheckIn.AddDays(bookingReservation.StayDays),
+            NumberOfPerson = bookingReservation.NumberOfPerson,
+            RoomType = roomTypeResult.ValueOrDefault,
+            Price = bookingReservation.Price
+        }; 
+
+        var jsonResult = await _jsonProcesses.SerializeModelAsync(modelReservation, cancellationToken);
+
+        if(jsonResult.IsFailed)
+            return Result.Fail(jsonResult.Errors.Select(e => e.Message));
+
+        return Result.Ok<object>(jsonResult.ValueOrDefault);
     }
 }
