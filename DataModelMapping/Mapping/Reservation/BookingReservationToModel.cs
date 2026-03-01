@@ -10,11 +10,9 @@ namespace DataModelMapping.Mapping.Reservation;
 public class BookingReservationToModel : IMappingStrategy
 {
     private readonly IJsonValidationPipeline<BookingReservation> _validation;
-    private readonly IJsonProcesses<ModelReservation> _jsonProcesses;
-    public BookingReservationToModel(IJsonValidationPipeline<BookingReservation> validation, IJsonProcesses<ModelReservation> jsonProcesses)
+    public BookingReservationToModel(IJsonValidationPipeline<BookingReservation> validation)
     {
         _validation = validation;
-        _jsonProcesses = jsonProcesses;
     }
     public MappingKey Key => new("Booking.Reservation", "Model.Reservation");
 
@@ -43,11 +41,6 @@ public class BookingReservationToModel : IMappingStrategy
             Price = bookingReservation.Price
         }; 
 
-        var jsonResult = await _jsonProcesses.SerializeModelAsync(modelReservation, cancellationToken);
-
-        if(jsonResult.IsFailed)
-            return Result.Fail(jsonResult.Errors.Select(e => e.Message));
-
-        return Result.Ok<object>(jsonResult.ValueOrDefault);
+        return Result.Ok<object>(modelReservation);
     }
 }

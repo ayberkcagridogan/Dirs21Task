@@ -10,11 +10,9 @@ namespace DataModelMapping.Mapping.Reservation;
 public class GoogleReservationToModel : IMappingStrategy
 {
     private readonly IJsonValidationPipeline<GoogleReservation> _validation;
-    private readonly IJsonProcesses<ModelReservation> _jsonProcesses;
-    public GoogleReservationToModel(IJsonValidationPipeline<GoogleReservation> validation, IJsonProcesses<ModelReservation> jsonProcesses)
+    public GoogleReservationToModel(IJsonValidationPipeline<GoogleReservation> validation)
     {
         _validation = validation;
-        _jsonProcesses = jsonProcesses;
     }
     public MappingKey Key => new("Google.Reservation", "Model.Reservation");
 
@@ -43,11 +41,6 @@ public class GoogleReservationToModel : IMappingStrategy
             Price = googleReservation.Price
         }; 
 
-        var jsonResult = await _jsonProcesses.SerializeModelAsync(modelReservation, cancellationToken);
-
-        if(jsonResult.IsFailed)
-            return Result.Fail(jsonResult.Errors.Select(e => e.Message));
-
-        return Result.Ok<object>(jsonResult.ValueOrDefault);
+        return Result.Ok<object>(modelReservation);
     }
 }

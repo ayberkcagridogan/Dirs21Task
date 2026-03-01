@@ -1,4 +1,4 @@
-namespace DataModelMapping.Mapping;
+namespace DataModelMapping.Models.Common;
 
 public readonly record struct MappingKey
 (   

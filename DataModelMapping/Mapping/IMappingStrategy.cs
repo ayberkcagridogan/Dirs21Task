@@ -1,3 +1,4 @@
+using DataModelMapping.Models.Common;
 using FluentResults;
 
 namespace DataModelMapping.Mapping;

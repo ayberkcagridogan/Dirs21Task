@@ -1,6 +1,5 @@
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 using DataModelMapping.Data;
+using DataModelMapping.Models.Common;
 using DataModelMapping.Models.Reservation;
 using DataModelMapping.Validators;
 using FluentResults;
@@ -10,11 +9,9 @@ namespace DataModelMapping.Mapping.Reservation;
 public class ModelReservationToGoogle : IMappingStrategy
 {
     private readonly IJsonValidationPipeline<ModelReservation> _validation;
-    private readonly IJsonProcesses<GoogleReservation> _jsonProcesses;
-    public ModelReservationToGoogle(IJsonValidationPipeline<ModelReservation> validation, IJsonProcesses<GoogleReservation> jsonProcesses)
+    public ModelReservationToGoogle(IJsonValidationPipeline<ModelReservation> validation)
     {
         _validation = validation;
-        _jsonProcesses = jsonProcesses;
     }
     public MappingKey Key => new("Model.Reservation", "Google.Reservation");
 
@@ -38,11 +35,6 @@ public class ModelReservationToGoogle : IMappingStrategy
             Price = modelReservation.Price
         };
 
-        var jsonResult = await _jsonProcesses.SerializeModelAsync(googleReservation);
-
-        if(jsonResult.IsFailed)
-            return Result.Fail(jsonResult.Errors.Select(e => e.Message));
-
-        return Result.Ok<object>(jsonResult.ValueOrDefault);
+        return Result.Ok<object>(googleReservation);
     }
 }

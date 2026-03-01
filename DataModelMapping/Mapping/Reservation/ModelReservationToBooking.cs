@@ -1,4 +1,5 @@
 using DataModelMapping.Data;
+using DataModelMapping.Models.Common;
 using DataModelMapping.Models.Reservation;
 using DataModelMapping.Validators;
 using FluentResults;
@@ -8,11 +9,9 @@ namespace DataModelMapping.Mapping.Reservation;
 public class ModelReservationToBooking : IMappingStrategy
 {
     private readonly IJsonValidationPipeline<ModelReservation> _validation;
-    private readonly IJsonProcesses<BookingReservation> _jsonProcesses;
-    public ModelReservationToBooking(IJsonValidationPipeline<ModelReservation> validation, IJsonProcesses<BookingReservation> jsonProcesses)
+    public ModelReservationToBooking(IJsonValidationPipeline<ModelReservation> validation)
     {
         _validation = validation;
-        _jsonProcesses = jsonProcesses;
     }
 
     public MappingKey Key => new("Model.Reservation", "Booking.Reservation");
@@ -37,10 +36,6 @@ public class ModelReservationToBooking : IMappingStrategy
             Price = modelReservation.Price
         };
 
-        var jsonResult = await _jsonProcesses.SerializeModelAsync(bookingReservation, cancellationToken);
-        if(jsonResult.IsFailed)
-            return Result.Fail(jsonResult.Errors.Select(x => x.Message));
-
-        return Result.Ok<object>(jsonResult.ValueOrDefault);
+        return Result.Ok<object>(bookingReservation);
     }
 }
