@@ -1,5 +1,4 @@
 ﻿using DataModelMapping.Extensions;
-using FluentResults;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DataModelMapping.Tests;
