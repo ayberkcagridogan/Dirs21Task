@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using FluentAssertions;
 using DataModelMapping.Models.Common;
 using DataModelMapping.Models.Reservation;
+using DataModelMapping.Mapping;
 
 namespace DataModelMapping.Tests.Mapping.Reservation;
 
@@ -12,6 +13,7 @@ public class BookingReservationToModelTest
     public BookingReservationToModelTest()
     {
         var serviceProvider = ServiceCollectionExtensions.Create();
+        MappingRegistry.Initialize(serviceProvider);
         _mappingHandler = serviceProvider.GetRequiredService<MappingHandler>();
     }
 
