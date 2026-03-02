@@ -18,8 +18,6 @@ public class MappingHandler
     {
         try
         {
-            Dictionary<MappingKey, IMappingStrategy> _mappingStrategies = getIMappingStrategies();
-
             if(data is null)
                 return Result.Fail("Data not found");
             if(string.IsNullOrEmpty(sourceType))
@@ -29,30 +27,15 @@ public class MappingHandler
 
             var key = new MappingKey(sourceType, targetType);
 
-            if (!_mappingStrategies.TryGetValue(key, out var strategy))
-                return Result.Fail($"Strategy not found: {sourceType} → {targetType}");
+            var mappingResult = MappingRegistry.Get(key);
+            if(mappingResult.IsFailed)
+                return Result.Fail(mappingResult.Errors.Select(e => e.Message));
 
-            return await strategy.ExecuteAsync(data, cancellationToken);
+            return await mappingResult.Value.ExecuteAsync(data, cancellationToken);
         }
         catch (Exception ex)
         {
             return Result.Fail(new Error($"{sourceType} → {targetType} mapping not executed successfully").CausedBy(ex));
         }
-    }
-
-    private Dictionary<MappingKey, IMappingStrategy> getIMappingStrategies()
-    {
-        var mappingTypes = Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t =>!t.IsAbstract && typeof(IMappingStrategy).IsAssignableFrom(t));
-
-        var mappingStrategies = mappingTypes
-            .Select(t => (IMappingStrategy)ActivatorUtilities.CreateInstance(_serviceProvider, t)!);
-
-        return mappingStrategies.ToDictionary
-                (
-                    s => s.Key,
-                    s => s
-                );
     }
 }
