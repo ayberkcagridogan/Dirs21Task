@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using DataModelMapping.Data;
 using FluentResults;
 using FluentValidation;

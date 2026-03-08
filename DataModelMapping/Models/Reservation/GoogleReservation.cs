@@ -1,5 +1,3 @@
-using DataModelMapping.Models.Common;
-
 namespace DataModelMapping.Models.Reservation;
 public class GoogleReservation
 {

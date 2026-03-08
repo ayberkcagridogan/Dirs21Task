@@ -1,7 +1,6 @@
 using DataModelMapping.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using FluentAssertions;
-using DataModelMapping.Models.Common;
 using DataModelMapping.Models.Reservation;
 using DataModelMapping.Mapping;
 
