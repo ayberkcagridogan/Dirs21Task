@@ -8,11 +8,6 @@ namespace DataModelMapping;
 
 public class MappingHandler
 {
-    private readonly IServiceProvider _serviceProvider;
-    public MappingHandler(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-    }
 
     public async Task<Result<object>> Map(object data, string sourceType, string targetType, CancellationToken cancellationToken = default)
     {
